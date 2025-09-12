@@ -1,0 +1,13 @@
+to ham karenge AI ko integrate aaj jisme ham use karenge Gemini ki API KEy which is free also I have to save data in the localstorage 
+Things left in our project 
+
+
+// I have to implement this 
+
+"payment integration";
+
+"You should want to do, if you click the order button at the time send the request to backend and save order details after that trigger the stripe, then appear the stripe page done payment, after the payment use webhook for saving the payment status, if order is successful delete the items from the cart for the specific user"
+
+
+
+in final touch we will give whole responsiveness
