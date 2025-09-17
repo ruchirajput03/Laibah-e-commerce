@@ -56,7 +56,7 @@ const VariationModal: React.FC<VariationModalProps> = ({ variation, onClose }) =
     }
   };
 
-  const handleInputChange = (field: keyof Variation, value: any) => {
+  const handleInputChange = (field: keyof Variation, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

@@ -1,57 +1,152 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
+    ref: 'Product',
     required: true
   },
-  name: { type: String, required: true }, // Product name (snapshot)
-  variation: {
-    size: { type: String }, // Optional if product has size
-    color: { type: String }, // Optional if product has color
-    materials: [{ type: String }], // Optional if product has materials
-    price: { type: Number, required: true }, // Variation price at purchase time
-    images: [{ type: String }] // Store the variation images
+  name: {
+    type: String,
+    required: true
   },
-  quantity: { type: Number, required: true, default: 1 },
-  subtotal: { type: Number, required: true } // price * quantity
-});
-
-const shippingSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  address: { type: String, required: true },
-  city: { type: String, required: true },
-  state: { type: String },
-  zip: { type: String },
-  country: { type: String, required: true },
-  phone: { type: String }
-});
-
-const paymentSchema = new mongoose.Schema({
-  method: { type: String, required: true }, // e.g., "Credit Card", "PayPal", "COD"
-  status: { type: String, default: "Pending" }, // Pending, Paid, Failed, Refunded
-  transactionId: { type: String, default: null }
-});
-
-const orderSchema = new mongoose.Schema(
-  {
-    orderId: { type: String, unique: true, required: true }, // Custom order ID
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // Null for guest checkout
-    userEmail: { type: String, required: true },
-    items: [orderItemSchema],
-    shipping: shippingSchema,
-    payment: paymentSchema,
-    totalAmount: { type: Number, required: true },
-    tax: { type: Number, default: 0 },
-    status: {
-      type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
-      default: "Pending"
-    }
+  size: {
+    type: String,
+    required: true
   },
-  { timestamps: true }
-);
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  image: {
+    type: String,
+    required: true
+  },
+  subtotal: {
+    type: Number,
+    required: true
+  }
+});
 
-module.exports = mongoose.model("Order", orderSchema);
+const shippingAddressSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  line1: {
+    type: String,
+    required: true
+  },
+  line2: String,
+  city: {
+    type: String,
+    required: true
+  },
+  state: {
+    type: String,
+    required: true
+  },
+  postal_code: {
+    type: String,
+    required: true
+  },
+  country: {
+    type: String,
+    required: true
+  }
+});
 
+const paymentDetailsSchema = new mongoose.Schema({
+  paymentIntentId: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  method: {
+    type: String,
+    default: 'card'
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'processing', 'succeeded', 'failed', 'canceled'],
+    default: 'pending'
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  currency: {
+    type: String,
+    default: 'aed'
+  },
+  paidAt: Date,
+  refundedAt: Date,
+  refundAmount: Number
+});
+
+const orderSchema = new mongoose.Schema({
+  orderNumber: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  customerEmail: {
+    type: String,
+    required: true
+  },
+  items: [orderItemSchema],
+  shippingAddress: shippingAddressSchema,
+  paymentDetails: paymentDetailsSchema,
+  subtotal: {
+    type: Number,
+    required: true
+  },
+  tax: {
+    type: Number,
+    required: true
+  },
+  total: {
+    type: Number,
+    required: true
+  },
+  orderStatus: {
+    type: String,
+    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'canceled'],
+    default: 'pending'
+  },
+  shippingMethod: String,
+  trackingNumber: String,
+  estimatedDelivery: Date,
+  notes: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+// Middleware to update updatedAt on save
+orderSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+// Generate order number
+orderSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    const count = await mongoose.model('Order').countDocuments();
+    this.orderNumber = `ORD-${Date.now()}-${String(count + 1).padStart(4, '0')}`;
+  }
+  next();
+});
+
+module.exports = mongoose.model('Order', orderSchema);

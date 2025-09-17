@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Upload, Plus, Minus } from "lucide-react";
 import { Editor } from "@tinymce/tinymce-react";
+import Image from "next/image";
 interface SizeStock {
   size: number;
   stock: number;
@@ -183,10 +184,14 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose }) => {
     }
   };
 
-  const handleInputChange = (field: keyof Product, value: any) => {
+  const handleInputChange = <K extends keyof Product>(
+    field: K,
+    value: Product[K] // automatically matches the type of the field
+  ) => {
     console.log(formData);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+  
 
   const handleCategoryChange = (categoryId: string) => {
     const selectedCategory = categories.find((cat) => cat._id === categoryId);
@@ -235,22 +240,25 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose }) => {
     }));
   };
 
-  const handleVariationChange = (
+  const handleVariationChange = <K extends keyof ProductVariation>(
     index: number,
-    field: keyof ProductVariation,
-    value: any
+    field: K,
+    value: ProductVariation[K] | FileList
   ) => {
     const updatedVariations = [...formData.variations];
+  
     if (field === "images" && value instanceof FileList) {
       updatedVariations[index].images = Array.from(value);
     } else {
-      (updatedVariations[index] as any)[field] = value;
+      updatedVariations[index][field] = value as ProductVariation[K];
     }
+  
     setFormData((prev) => ({
       ...prev,
       variations: updatedVariations,
     }));
   };
+  
 
   const handleSizeChange = (
     variationIndex: number,
@@ -477,7 +485,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose }) => {
               </div>
               {formData.baseImage && (
                 <div className="mt-2">
-                  <img
+                  <Image
                     src={
                       typeof formData.baseImage === "string"
                         ? formData.baseImage
@@ -623,15 +631,15 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose }) => {
 
                     {variation.images.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {variation.images.map((image, imgIndex) => (
-                          <div key={imgIndex} className="relative">
-                            <img
+                        {variation.images.map((image, ImageIndex) => (
+                          <div key={ImageIndex} className="relative">
+                            <Image
                               src={
                                 typeof image === "string"
                                   ? image
                                   : URL.createObjectURL(image)
                               }
-                              alt={`variation-preview-${vIndex}-${imgIndex}`}
+                              alt={`variation-preview-${vIndex}-${ImageIndex}`}
                               className="w-16 h-16 object-cover rounded border"
                             />
                             <button
@@ -642,7 +650,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose }) => {
                                 ];
                                 updatedVariations[vIndex].images =
                                   updatedVariations[vIndex].images.filter(
-                                    (_, i) => i !== imgIndex
+                                    (_, i) => i !== ImageIndex
                                   );
                                 setFormData((prev) => ({
                                   ...prev,
@@ -734,7 +742,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose }) => {
               ))
             ) : (
               <p className="text-gray-500 text-sm">
-                No variations added yet. Click "Add Variation" to create one.
+                No variations added yet. Click Add Variation to create one.
               </p>
             )}
           </div>

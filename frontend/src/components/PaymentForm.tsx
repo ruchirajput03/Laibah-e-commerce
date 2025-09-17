@@ -9,7 +9,7 @@ import { usePayment } from '@/components/hooks/usePayment';
 
 interface PaymentFormProps {
   amount: number;
-  onSuccess?: (paymentIntent: any) => void;
+  onSuccess?: (paymentIntent:any) => void;
   onError?: (error: Error) => void;
 }
 
@@ -85,17 +85,39 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onSuccess, onError })
       if (stripeError) {
         const err = new Error(stripeError.message || 'Payment failed');
         setError(err.message);
-        onError?.(err);
+        if (err instanceof Error) {
+          if (err instanceof Error) {
+            if (err instanceof Error) {
+              onError?.(err);
+            } else {
+              onError?.(new Error('An unknown error occurred'));
+            }
+          } else {
+            onError?.(new Error('An unknown error occurred'));
+          }
+        } else {
+          onError?.(new Error('An unknown error occurred'));
+        }
       }
        else if (paymentIntent) {
         savePaymentToHistory({ paymentIntent });
         clearPaymentData();
         onSuccess?.(paymentIntent);
       }
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
-      onError?.(err);
+    } catch (err: unknown) {
+      let message = 'Something went wrong';
+      
+      if (err instanceof Error) {
+        message = err.message;
+        onError?.(err); // safe now, err is Error
+      } else {
+        onError?.(new Error(String(err))); // wrap unknown in Error
+      }
+    
+      setError(message);
     }
+    
+    
   };
 
   const handleInputChange = (field: string, value: string) => {

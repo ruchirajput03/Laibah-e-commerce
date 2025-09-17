@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { PaymentStorage, PaymentData, PaymentIntent } from '@/utils/storage';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { PaymentStorage, PaymentData, PaymentIntent } from "@/utils/storage";
+import axios from "axios";
 interface CreatePaymentIntentResponse {
   clientSecret: string;
   paymentIntentId: string;
@@ -13,7 +13,7 @@ interface PaymentIntentResult {
     amount: number;
     currency: string;
     status: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   };
 }
 
@@ -33,23 +33,26 @@ export const usePayment = () => {
   }, []);
 
   // Create payment intent
-  const createPaymentIntent = async (amount: number, metadata: Record<string, any> = {}) => {
+  const createPaymentIntent = async (
+    amount: number,
+    metadata: Record<string, unknown> = {}
+  ) => {
     setIsLoading(true);
     setError(null);
-  
+
     try {
       const response = await axios.post<CreatePaymentIntentResponse>(
         `${process.env.NEXT_PUBLIC_API_URL}/api/create-payment-intent`,
         { amount, metadata },
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
-  
+
       const data = response.data;
-  
+
       const newPaymentData: PaymentData = {
         clientSecret: data.clientSecret,
         paymentIntentId: data.paymentIntentId,
@@ -57,17 +60,21 @@ export const usePayment = () => {
         metadata,
         createdAt: new Date().toISOString(),
       };
-  
+
       setPaymentData(newPaymentData);
       PaymentStorage.savePaymentData(newPaymentData);
-  
+
       return data;
-    } catch (err: any) {
-      const message =
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Failed to create payment intent';
-  
+    } catch (err: unknown) {
+      let message = "Failed to create payment intent";
+
+      // Narrow the type
+      if (axios.isAxiosError(err)) {
+        message = err.response?.data?.error?.message || err.message || message;
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+
       setError(message);
       throw new Error(message);
     } finally {

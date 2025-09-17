@@ -3,7 +3,7 @@ export interface PaymentData {
     clientSecret: string;
     paymentIntentId: string;
     amount: number;
-    metadata?: Record<string, any>;
+    metadata?: Record<string,unknown>;
     createdAt: string;
   }
   
@@ -13,7 +13,7 @@ export interface PaymentData {
     currency: string;
     status: string;
     created: number;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }
   
   export const PaymentStorage = {

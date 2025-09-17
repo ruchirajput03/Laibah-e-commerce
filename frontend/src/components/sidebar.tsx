@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../context/authContext";
 import {
@@ -56,7 +57,11 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
         <div className="flex items-center justify-between h-16 px-6 shadow-sm border-gray-200">
         <div className="flex items-center gap-2">
             <Link href="/">
-            <img src="/Logo.svg" alt="Laibah Logo" className="w-full h-full max-w-[120px]" />
+            <Image src="/Logo.svg"
+            width={120}
+            height={40}
+             alt="Laibah Logo"
+             className="w-full h-full max-w-[120px]" />
             </Link>
           </div>
           <button

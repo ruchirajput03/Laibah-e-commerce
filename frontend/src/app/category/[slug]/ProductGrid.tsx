@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface Product {
     id: number;
     name: string;
@@ -31,7 +33,7 @@ interface Product {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto p-4">
         {products.map(product => (
           <div key={product.id} className="border rounded-lg p-4 hover:shadow-lg transition">
-            <img src={product.image} alt={product.name} className="w-full h-40 object-cover rounded-md" />
+            <Image src={product.image} alt={product.name} className="w-full h-40 object-cover rounded-md" />
             <h2 className="mt-2 text-lg font-semibold">{product.name}</h2>
             <p className="text-gray-500">AED{product.price}</p>
           </div>

@@ -65,9 +65,19 @@ export default function Home() {
         const response = await axios.get("http://localhost:8080/api/products");
         console.log(response.data.products, "Fetched products");
         setProducts(response.data.products);
-      } catch (err: any) {
-        console.error("Error fetching products:", err);
-        setError(err.response?.data?.message || err.message || "Something went wrong");
+      } catch (err: unknown) {
+        let errorMessage = "Something went wrong";
+  
+        if (axios.isAxiosError(err)) {
+          // Axios error
+          errorMessage = err.response?.data?.message || err.message;
+        } else if (err instanceof Error) {
+          // Regular JS error
+          errorMessage = err.message;
+        }
+  
+        console.error("Error fetching products:", errorMessage);
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -98,7 +108,7 @@ export default function Home() {
           </h1>
           <p className="text-white text-xs sm:text-lg lg:text-xl max-w-2xl mt-4">
             Unlock your full potential with a design that supports every step,
-            ensuring maximum comfort and performance whether you're running on
+            ensuring maximum comfort and performance whether you&apos;re running on
             the road or tackling the toughest trails.
           </p>
           <Link href="/products" className="bg-black text-white px-6 py-3 mt-6 rounded-lg hover:bg-white hover:text-black transition duration-300">

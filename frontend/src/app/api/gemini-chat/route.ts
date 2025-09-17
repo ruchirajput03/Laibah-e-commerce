@@ -1,49 +1,49 @@
-// src/app/api/gemini-chat/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { messages } = body;
+    const { message, history } = await request.json();
 
-    const latestMessage = messages?.[messages.length - 1]?.content;
-
-    if (!latestMessage) {
-      return NextResponse.json({ error: "Missing user message" }, { status: 400 });
-    }
-
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
-      return NextResponse.json({ error: "GEMINI_API_KEY not set" }, { status: 500 });
-    }
-
-    // ✅ FIX: use gemini-1.5-pro (or gemini-1.5-flash)
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`;
-
-    const response = await axios.post(
-      url,
-      {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         contents: [
           {
-            role: 'user',
-            parts: [{ text: latestMessage }],
-          },
+            parts: [
+              {
+                text: `You are a helpful customer support assistant. Be friendly, professional, and concise. 
+
+Customer message: ${message}`
+              }
+            ]
+          }
         ],
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 200,
+        }
+      }),
+    });
 
-    const reply = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!response.ok) {
+      throw new Error('Failed to get response from Gemini');
+    }
 
-    return NextResponse.json({ reply: reply || "Sorry, no response from Gemini." });
-  } catch (error: any) {
-    console.error("Gemini API error:", error?.response?.data || error.message);
+    const data = await response.json();
+    const aiResponse = data.candidates[0].content.parts[0].text;
+
+    return NextResponse.json({ message: aiResponse });
+
+  } catch (error) {
+    console.error('Gemini API error:', error);
     return NextResponse.json(
-      { error: error?.response?.data || "Internal server error" },
+      { error: 'Failed to process message' },
       { status: 500 }
     );
   }

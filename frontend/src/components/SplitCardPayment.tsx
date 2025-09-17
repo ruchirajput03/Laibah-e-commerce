@@ -11,7 +11,7 @@ import { usePayment } from '@/components/hooks/usePayment';
 
 interface SplitCardPaymentProps {
   amount: number;
-  onSuccess?: (paymentIntent: any) => void;
+  onSuccess?: (paymentIntent: unknown) => void;
   onError?: (error: Error | StripeError) => void;
 }
 
@@ -83,7 +83,7 @@ const SplitCardPayment: React.FC<SplitCardPaymentProps> = ({
         savePaymentToHistory({ paymentIntent });
         onSuccess?.(paymentIntent);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error');
       onError?.(error);
     }

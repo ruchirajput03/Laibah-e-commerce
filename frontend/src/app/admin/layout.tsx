@@ -2,7 +2,7 @@
 
 
 import Sidebar from "@/components/sidebar";
-import { useRouter } from "next/navigation";
+
 import React from "react";
 import Header from "@/components/topbar"
 import ProtectedRoute from "@/components/ProtectedRoutes";
@@ -11,11 +11,12 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const router = useRouter();
+
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar children={undefined} />
+      {/* <Sidebar children={undefined} /> */}
+      <Sidebar> children={undefined} </Sidebar>
       <div className="flex-1 relative ">
         <Header />
         <ProtectedRoute>

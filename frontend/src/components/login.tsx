@@ -92,18 +92,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useAuth } from "@/context/authContext";
 
-type LoginResponse = {
-  user?: {
-    role?: string;
-    // add other user fields if needed
-  };
-  role?: string; // fallback if role is at the root
-  // add other fields if needed
-};
+// type LoginResponse = {
+//   user?: {
+//     role?: string;
+//     // add other user fields if needed
+//   };
+//   role?: string; // fallback if role is at the root
+//   // add other fields if needed
+// };
 
 const Login = () => {
   const router = useRouter();
@@ -133,6 +133,7 @@ const Login = () => {
         router.push('/');
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError('Invalid email or password');
     } finally {
       setIsLoading(false);

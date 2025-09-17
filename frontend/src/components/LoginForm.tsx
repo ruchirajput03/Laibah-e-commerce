@@ -9,7 +9,7 @@ export default function LoginForm() {
     <div className="w-full max-w-md text-black">
       <h2 className="text-3xl font-bold mb-4 ">Welcome Back!</h2>
       <p className="text-gray-600 mb-8">
-        Log in now to explore all the features and benefits of our platform and see what's new.
+        Log in now to explore all the features and benefits of our platform and see what&apos;s new.
       </p>
 
       <form className="space-y-5">

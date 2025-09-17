@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, ReactElement } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { useParams} from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/productCard";
-import { Star } from "lucide-react";
+
 import axios from "axios";
 
 import { useCart } from "@/context/cartContext";
@@ -81,8 +81,16 @@ export default function ProductPage() {
       try {
         const response = await axios.get("http://localhost:8080/api/products");
         setProducts(response.data.products);
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || "Something went wrong");
+      } catch (err:unknown) {
+        if (axios.isAxiosError(err)) {
+          if (err instanceof Error) {
+            setError(err.message || "Something went wrong");
+          } else {
+            setError("Something went wrong");
+          }
+        } else {
+          setError("Something went wrong");
+        }
       }
     };
     fetchProducts();
@@ -102,8 +110,12 @@ export default function ProductPage() {
         // Default to first size with stock > 0
         const firstAvailableSize = firstVariation?.sizes.find((s) => s.stock > 0);
         setSelectedSize(firstAvailableSize?.size || null);
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || "Something went wrong");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message || "Something went wrong");
+        } else {
+          setError("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }

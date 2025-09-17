@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
 import axios from 'axios'; // Import axios
-
+import Image from 'next/image';
 // Define types for the message and user
 interface Message {
   _id: string;
@@ -84,8 +84,8 @@ export default function ChatApp() {
           >
             {/* Avatar */}
             <div className="flex-shrink-0">
-              <img
-                src={`https://img.daisyui.com/images/profile/demo/${
+              <Image
+                src={`https://Image.daisyui.com/images/profile/demo/${
                   msg.sender === 'Obi-Wan Kenobi' ? 'kenobee' : 'anakeen'
                 }@192.webp`}
                 alt={msg.sender}

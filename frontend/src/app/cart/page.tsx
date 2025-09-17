@@ -2,11 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import { Trash2, X, Plus, Minus } from "lucide-react";
+import {  X, Plus, Minus } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { useCart } from "@/context/cartContext";
-
+import Image from "next/image";
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart();
 
@@ -71,8 +71,10 @@ export default function CartPage() {
                       <Link href={`/productdetail/${item.id}`}>
                         <div className="flex gap-3 mb-3">
                           <div className="w-20 h-20 flex-shrink-0">
-                            <img
+                            <Image
                               src={process.env.API_URL + `${item.image}`}
+                              width={80}
+                              height={80}
                               alt={item.title}
                               className="w-full h-full object-cover rounded-md"
                             />
@@ -123,8 +125,10 @@ export default function CartPage() {
                     <div className="hidden sm:flex items-center gap-4">
                       <Link href={`/productdetail/${item.id}`} className="flex gap-4 items-center flex-1 min-w-0">
                         <div className="w-24 h-24 lg:w-28 lg:h-28 flex-shrink-0">
-                          <img
+                          <Image
                             src={process.env.API_URL + `${item.image}`}
+                            width={112}
+                            height={112}
                             alt={item.title}
                             className="w-full h-full object-cover rounded-md"
                           />
@@ -150,7 +154,7 @@ export default function CartPage() {
                           onClick={() => updateQuantity(item.id, item.size, -1)}
                           aria-label="Decrease quantity"
                         >
-                          <Minus className="w-4 h-4" />
+                          <Minus className="w-4 h-4"/>
                         </button>
                         <span className="px-3 py-2 min-w-[50px] text-center font-medium">{item.quantity}</span>
                         <button
@@ -182,7 +186,7 @@ export default function CartPage() {
             )}
           </div>
 
-          {/* Order Summary Section */}
+   
           {!isCartEmpty && (
             <div className="w-full lg:w-96 lg:flex-shrink-0">
               <div className="bg-gray-50 rounded-lg p-4 sm:p-6 sticky top-4">

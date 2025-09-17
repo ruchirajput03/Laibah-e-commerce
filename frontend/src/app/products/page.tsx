@@ -160,7 +160,7 @@ export default function ProductPage() {
     const maxVisible = 5;
 
     let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
     // Adjust startPage if we're near the end
     if (endPage - startPage + 1 < maxVisible) {

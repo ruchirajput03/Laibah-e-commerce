@@ -9,7 +9,7 @@ interface Payment {
   currency: string;
   status: string;
   createdAt: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 const PaymentHistory: React.FC = () => {
@@ -26,7 +26,8 @@ const PaymentHistory: React.FC = () => {
       createdAt: typeof pi.created === 'number'
         ? new Date(pi.created * 1000).toISOString()
         : new Date().toISOString(), // fallback
-      metadata: (pi as any).metadata ?? {}, // metadata might not exist on your stored object
+        metadata: (pi as unknown as { metadata?: Record<string, unknown> }).metadata ?? {}
+        , // metadata might not exist on your stored object
     }));
 
     setPayments(mappedPayments);

@@ -33,6 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       localStorage.setItem('adminUser', JSON.stringify(res.data.data));
       window.location.reload(); // re-syncs context with new data
     } catch (error) {
+      console.error('Error fetching user:', error);
       if (attempts < MAX_RETRIES) {
         setAttempts((prev) => prev + 1);
       } else {

@@ -55,8 +55,12 @@ export default function SignupForm() {
       localStorage.setItem("token", token);
 
       router.push("/checkout");
-    } catch (err: any) {
-      setLocalError(err.response?.data?.message || "Signup failed. Try again.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setLocalError(err.response.data.message);
+      } else {
+        setLocalError("Signup failed. Try again.");
+      }
     } finally {
       setLoading(false);
     }

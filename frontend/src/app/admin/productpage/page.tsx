@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useCallback,useState, useEffect } from "react";
 import api from "@/utils/api";
-import axios from "axios";
+import Image from "next/image";
 import { Plus, Search, Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import ProductModal from "@/components/productModal";
-import Link from "next/link";
+
 
 // Updated interface to match backend structure
 interface SizeStock {
@@ -62,41 +62,24 @@ const Products: React.FC = () => {
     "sports",
   ];
 
-  useEffect(() => {
-    fetchProducts();
-  }, [
-    currentPage,
-    selectedCategory,
-    selectedBrand,
-    selectedColor,
-    minPrice,
-    maxPrice,
-    searchTerm,
-  ]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
+
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: "12",
       });
 
-      // Add filters based on backend controller
       if (selectedCategory) params.append("category", selectedCategory);
       if (selectedBrand) params.append("brand", selectedBrand);
       if (selectedColor) params.append("color", selectedColor);
       if (minPrice) params.append("minPrice", minPrice);
       if (maxPrice) params.append("maxPrice", maxPrice);
-      if (searchTerm) {
-        // Backend doesn't have search, so we'll filter by name client-side for now
-        // Or you could extend the backend to include name search
-      }
 
       const response = await api.get(`/products?${params}`);
-      let fetchedProducts = response.data.products;
+      let fetchedProducts: Product[] = response.data.products;
 
-      // Client-side search filter if needed
       if (searchTerm) {
         fetchedProducts = fetchedProducts.filter(
           (product: Product) =>
@@ -112,7 +95,12 @@ const Products: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, selectedCategory, selectedBrand, selectedColor, minPrice, maxPrice, searchTerm]);
+
+  // ✅ Safe usage inside useEffect
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -332,9 +320,11 @@ const Products: React.FC = () => {
                   >
                     <div className="aspect-square bg-gray-100 relative">
                       {primaryImage ? (
-                        <img
+                        <Image
                           src={primaryImage}
                           alt={product.name}
+                          width={400}
+                          height={400}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
