@@ -8,12 +8,15 @@ exports.createPaymentIntent = async (req, res) => {
   try {
     const { 
       amount, 
-      currency = 'AED', 
+      currency = 'aed', 
       customerEmail, 
       shippingDetails, 
-      orderItems 
+      orderItems ,
+      calculatedSubtotal,
+      calculatedTax,
+      calculatedTotal
     } = req.body;
-
+console.log('Create PaymentIntent request body:', req.body);
     // Validate required fields
     if (!amount || !customerEmail || !shippingDetails || !orderItems) {
       return res.status(400).json({
@@ -22,18 +25,49 @@ exports.createPaymentIntent = async (req, res) => {
       });
     }
 
-    // Calculate totals
-    const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // Calculate totals on backend (including discounts)
+    const subtotal = orderItems.reduce((sum, item) => {
+      const priceAfterDiscount = item.price * (1 - (item.discount || 0) / 100);
+      return sum + (priceAfterDiscount * item.quantity);
+    }, 0);
     const tax = subtotal * 0.05; // 5% tax
     const total = subtotal + tax;
 
-    // Verify amount matches calculation
-    if (Math.abs(amount - Math.round(total * 100)) > 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Amount mismatch'
-      });
-    }
+    console.log('Backend calculation:', {
+      subtotal,
+      tax,
+      total,
+      amountInFils: Math.round(total * 100)
+    });
+
+
+       // Use frontend calculated totals if provided, otherwise use backend calculation
+       const finalSubtotal = calculatedSubtotal || subtotal;
+       const finalTax = calculatedTax || tax;
+       const finalTotal = calculatedTotal || total;
+       const expectedAmount = Math.round(finalTotal * 100);
+
+  // Verify amount matches calculation (allow 1 fil tolerance for rounding)
+  if (Math.abs(amount - expectedAmount) > 1) {
+    console.error('Amount mismatch:', {
+      received: amount,
+      expected: expectedAmount,
+      difference: amount - expectedAmount,
+      frontendTotal: calculatedTotal,
+      backendTotal: total
+    });
+
+    return res.status(400).json({
+      success: false,
+      message: `Amount mismatch. Expected: ${expectedAmount}, Received: ${amount}`,
+      debug: {
+        receivedAmount: amount,
+        expectedAmount: expectedAmount,
+        backendCalculation: { subtotal, tax, total },
+        frontendCalculation: { calculatedSubtotal, calculatedTax, calculatedTotal }
+      }
+    });
+  }
 
     // Create or get Stripe customer
     let stripeCustomer;

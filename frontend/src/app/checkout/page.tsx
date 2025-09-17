@@ -64,11 +64,27 @@ function CheckoutForm() {
         throw new Error("Card element not found");
       }
 
+      // Calculate totals to ensure consistency
+    const calculatedSubtotal = cart.reduce((sum, item) => {
+      const priceAfterDiscount = item.price * (1 - (item.discount || 0) / 100);
+      return sum + (priceAfterDiscount * item.quantity);
+    }, 0);
+    
+    const calculatedTax = calculatedSubtotal * 0.05; // 5% tax
+    const calculatedTotal = calculatedSubtotal + calculatedTax;
+
+    console.log('Frontend Calculation:', {
+      subtotal: calculatedSubtotal,
+      tax: calculatedTax,
+      total: calculatedTotal,
+      amountInFils: Math.round(calculatedTotal * 100)
+    });
+
       // 1. Create PaymentIntent on backend
       const paymentRes = await axios.post(
         `${process.env.API_URL}/api/payments/create-intent`,
         {
-          amount: Math.round(total * 100), // Convert to cents/fils
+          amount: Math.round(calculatedTotal * 100), // Use calculated total
           currency: "aed",
           customerEmail: contactEmail,
           shippingDetails: {
@@ -89,9 +105,14 @@ function CheckoutForm() {
             quantity: item.quantity,
             price: item.price,
             image: item.image,
+            discount: item.discount || 0 // Include discount in calculation
           })),
+          calculatedSubtotal,
+          calculatedTax,
+          calculatedTotal
         }
       );
+      
 
       const { clientSecret, orderId } = paymentRes.data;
 
